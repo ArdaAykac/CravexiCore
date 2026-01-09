@@ -102,6 +102,8 @@ game.add(hero)
 
 # Döngüyü Çalıştır
 game.run()
+
+
 🤝 Katkıda Bulunma
 Bu depoyu çatallayın (Fork).
 
