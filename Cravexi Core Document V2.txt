@@ -1,0 +1,241 @@
+Cravexi Core – Document
+
+Bu doküman, **Cravexi Core** framework’ünü daha önce hiç görmemiş bir geliştiricinin bile **okuyarak öğrenebileceği**, **kopyala‑çalıştır örneklerle** ilerleyebileceği şekilde hazırlanmıştır.
+
+Amaç sadece API’yi listelemek değil; **neden böyle tasarlandı**, **ne zaman hangi parçayı kullanmalısın** ve **gerçek bir oyunu nasıl kurarsın** sorularını net biçimde cevaplamaktır.
+
+---
+
+## 0. Bu Framework Ne Yapar?
+
+Cravexi Core, Python ile:
+
+* **Terminal tabanlı oyunlar**
+* **OpenGL (2D) tabanlı oyunlar**
+* **Deneysel oyun motorları**
+
+geliştirmek için yazılmış **hafif ve modüler** bir framework’tür.
+
+### Temel Felsefe
+
+* Karmaşık motorlar yerine **kontrol geliştiricide olsun**
+* Öğrenilebilir, okunabilir kod
+* Unity benzeri ama **çok daha sade** bir yapı
+
+---
+
+## 1. Kurulum ve Proje Yapısı (İLK ADIM)
+
+### Önerilen Klasör Yapısı
+
+```text
+my_game/
+ ├─ engine/          # Cravexi Core dosyaları
+ ├─ main.py          # Oyunun başlangıç noktası
+ └─ database/        # Kayıt dosyaları (otomatik oluşur)
+```
+
+> `database` klasörü SaveSystem tarafından otomatik oluşturulur.
+
+---
+
+## 2. En Basit Çalışan Oyun (Quick Start)
+
+Aşağıdaki kod **framework’ün kalbini** anlaman için yeterlidir.
+
+### main.py
+
+```python
+from engine.ecosystem import GameLoop, Behaviour
+
+class MyGame(Behaviour):
+    def start(self):
+        print("Oyun başladı")
+
+    def update(self, dt):
+        pass
+
+game = GameLoop(target_fps=60)
+game.add(MyGame())
+game.run()
+```
+
+### Burada Ne Oldu?
+
+* `GameLoop` oyunun ana döngüsünü yönetir
+* `Behaviour` oyun objelerinin temel sınıfıdır
+* `start()` bir kere çağrılır
+* `update(dt)` her frame çalışır
+
+---
+
+## 3. GameLoop ve Behaviour (EN ÖNEMLİ KISIM)
+
+### Behaviour Nedir?
+
+`Behaviour`, oyundaki **her şeyin** temelidir.
+Oyuncu, düşman, UI controller… hepsi bundan türetilir.
+
+```python
+class Player(Behaviour):
+    def awake(self):
+        print("Oyuncu oluşturuldu")
+
+    def start(self):
+        print("Oyun başladı")
+
+    def update(self, dt):
+        print("Geçen süre:", dt)
+```
+
+### Metodlar Ne Zaman Çalışır?
+
+| Metod  | Ne Zaman                | Neden Var          |
+| ------ | ----------------------- | ------------------ |
+| awake  | obj.add() çağrıldığında | İlk kurulum        |
+| start  | GameLoop.run() başında  | Başlangıç ayarları |
+| update | Her frame               | Oyun mantığı       |
+| draw   | Çizim gerekiyorsa       | Grafik             |
+
+---
+
+## 4. Oyun Oluşturma ve Kayıt Sistemi
+
+### New_Game – Oyun Tanımlama
+
+```python
+from engine.ecosystem import New_Game
+
+New_Game.new_game("MyFirstGame", networking=False)
+```
+
+**Neden var?**
+
+* Her oyunun kendi klasörü olsun diye
+* SaveSystem ve debug sistemi bu bilgiyi kullanır
+
+---
+
+### SaveSystem – Envanter Kaydetme
+
+```python
+from engine.inventory import Inventory
+from engine.ecosystem import SaveSystem
+
+inv = Inventory()
+inv.items = {"game:stone": 5}
+
+SaveSystem.save_inventory("MyFirstGame", inv)
+SaveSystem.load_inventory("MyFirstGame", inv)
+```
+
+**Parametreler Neden Böyle?**
+
+* `game_name`: Hangi oyuna ait olduğu
+* `inventory`: Sadece `Inventory` kabul eder (kontrol için)
+* `filename`: İleride farklı kayıt türleri için
+
+---
+
+## 5. Registry ve Inventory (ITEM SİSTEMİ)
+
+### Registry Ne İşe Yarar?
+
+Registry, oyundaki **tüm itemlerin merkezi kaydıdır**.
+
+```python
+from engine.items import load_vanilla_item
+
+load_vanilla_item()
+```
+
+### Inventory Kullanımı
+
+```python
+inv.add_item("game:stone", 3)
+```
+
+**Neden Registry zorunlu?**
+
+* Yanlış item eklenmesini engeller
+* Item verilerini tek yerden yönetir
+
+---
+
+## 6. Terminal UI Sistemi (GUIS.py)
+
+### Sahne Mantığı
+
+Bir oyunda birden fazla ekran olabilir:
+
+* Ana Menü
+* Ayarlar
+* Oyun İçi Menü
+
+Bunlara **Scene** denir.
+
+```python
+from engine.GUIS import Scene, Button, SceneManager
+
+menu = Scene("MainMenu")
+menu.ui_manager.add(Button("Başla", lambda: print("Start")))
+
+sm = SceneManager()
+sm.change_scene(menu)
+```
+
+### Input Nasıl Çalışır?
+
+* `w / s` → seçim
+* `enter` → tıklama
+* Buton ismini yazmak → direkt çalıştırır
+
+---
+
+## 7. OpenGL Pencere ve Butonlar
+
+### OPD2 – Pencere Açma
+
+```python
+from engine.GUIS import OPD2
+
+app = OPD2(800, 600, "My Game")
+```
+
+### GLButton Kullanımı
+
+```python
+from engine.GLELEMENTS import GLButton
+
+btn = GLButton(100, 100, 200, 50, (0, 1, 0), lambda: print("Click"))
+```
+
+**Parametreler Neden Böyle?**
+
+* Piksel bazlı kontrol
+* OpenGL ile doğrudan uyum
+
+---
+
+## 8. Debug Sistemi
+
+```python
+from engine.ecosystem import debug_system
+
+debug_system.debug(None, "game name", "networking", debug=True)
+```
+
+**Amaç**: Gereksiz log yerine kontrollü bilgi
+
+---
+
+## 9. Network (Deneysel)
+
+```python
+from engine.network_driver import network
+
+network.create_server("127.0.0.1", 5555)
+```
+
+> Bu sistem temel seviye içindir, production amaçlı değildir.
+

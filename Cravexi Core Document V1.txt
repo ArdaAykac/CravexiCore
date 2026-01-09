@@ -1,0 +1,126 @@
+Harika, dökümantasyonu doğrudan bir projenin README.md dosyasına veya teknik döküman sayfasına yapıştırabileceğin şekilde, temiz ve profesyonel bir Markdown formatına getirdim.
+
+Aşağıdaki metni kopyalayarak kullanabilirsin:
+
+🛠️ Cravexi Core - Teknik Dokümantasyon
+Cravexi Core; Python ile geliştirilmiş, hem Terminal (CLI) hem de OpenGL (GUI) tabanlı projeler üretmek için tasarlanmış hibrit bir oyun motoru çekirdeğidir. Bu doküman, kütüphanenin mimarisini ve kullanım standartlarını içerir.
+
+1. Genel Mimari Yapı
+Engine, birbirinden bağımsız çalışan ancak ortak veri yollarını kullanan modüllerden oluşur:
+
+Game Core: GameLoop, Behaviour ve Scene sistemini yönetir.
+
+UI Katmanı: Terminal ve OpenGL destekli hibrit arayüz sunar.
+
+Data Katmanı: JSON tabanlı SaveSystem, Registry ve Inventory.
+
+Debug & Tools: Performans için RAMManager ve hata ayıklama için debug_system.
+
+Network: Hafif siklet TCP sunucu altyapısı.
+
+2. ecosystem.py (Motorun Kalbi)
+2.1 New_Game
+Yeni bir oyun projesi başlatır ve klasör yapısını (database vb.) otomatik oluşturur.
+
+Python
+
+from ecosystem import New_Game
+
+# Yeni bir oyun dizini oluşturur
+New_Game.new_game("SpaceQuest", networking=True)
+2.2 Behaviour (Yaşam Döngüsü)
+Tüm oyun nesneleri bu sınıftan türetilmelidir. Unity benzeri bir çalışma mantığı sunar.
+
+Python
+
+class Player(Behaviour):
+    def awake(self):
+        # Nesne ilk oluşturulduğunda
+        pass
+
+    def start(self):
+        # Oyun döngüsü başlamadan hemen önce
+        pass
+
+    def update(self, dt):
+        # Her karede çalışır (dt: Delta Time)
+        pass
+
+    def draw(self):
+        # Grafik çizim işlemleri
+        pass
+2.3 RAMManager
+Disk I/O işlemlerini minimize etmek için verileri geçici bellekte saklar.
+
+Python
+
+from ecosystem import RAMManager
+
+memory = RAMManager(size_kb=1024)
+memory.store("map_data", b"binary_data_here")
+data = memory.load("map_data")
+3. UI ve Grafik Sistemleri
+3.1 GLELEMENTS (OpenGL UI)
+OpenGL üzerinde etkileşimli butonlar ve paneller oluşturmak için kullanılır.
+
+Python
+
+from GLELEMENTS import GLButton
+
+def on_click_event():
+    print("Butona tıklandı!")
+
+btn = GLButton(x=0.5, y=0.5, w=0.2, h=0.1, color=(1, 0, 0), on_click=on_click_event)
+3.2 OPD2 (Pencere Yönetimi)
+OpenGL penceresini başlatan ve yöneten ana sınıftır.
+
+Python
+
+from GUIS import OPD2
+
+app = OPD2(800, 600, "Cravexi Core Project")
+4. Veri ve Envanter Sistemi
+4.1 Registry (Kayıt Defteri)
+Bir eşyanın (item) envantere eklenebilmesi için önce kaydedilmesi gerekir.
+
+Python
+
+from registry import Registry
+
+Registry.register_item("iron_ore", {"weight": 5, "value": 10})
+4.2 SaveSystem (Kalıcı Kayıt)
+Oyuncu verilerini JSON formatında diske yazar ve okur.
+
+Python
+
+from ecosystem import SaveSystem
+
+# Kaydetme
+SaveSystem.save_inventory("SpaceQuest", player_inventory)
+
+# Yükleme
+SaveSystem.load_inventory("SpaceQuest", player_inventory)
+5. Network Modülü
+Basit TCP sunucusu oluşturmak için kullanılır. Geliştirme aşamasındaki projeler için uygundur.
+
+Python
+
+from network_driver import create_server
+
+# 4 oyunculu bir sunucu başlatır
+create_server(server_ip="127.0.0.1", port=5555, max_player=4)
+6. Örnek Oyun Döngüsü (Boilerplate)
+Python
+
+from ecosystem import GameLoop
+from my_entities import Player
+
+# Motoru başlat
+game = GameLoop(target_fps=60, debug=True)
+
+# Nesne ekle
+hero = Player()
+game.add(hero)
+
+# Çalıştır
+game.run()

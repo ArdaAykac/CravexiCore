@@ -1,0 +1,3 @@
+.pyd ue dönüştürme için önce .py dosyalarını enginepyd klasörüner at
+sonra setup.py adlı   uygulamayı çalıştırmak için terminale bunu yaz
+python setup.py build_ext --inplace
