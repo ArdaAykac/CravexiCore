@@ -184,7 +184,19 @@ finally:
 ```
 
 > Bu oyunda **Taş Topla** veya **Kaydet & Çık** seçildiğinde `database/TerminalGame/*.json` dosyasına taş sayısı kaydedilir.
+>
+> 
+> ![Cravexi Core Preview](assets/terminal1.png)
 
+
+
+
+> ![Cravexi Core Preview](assets/terminal2.png)
+
+
+
+
+> ![Cravexi Core Preview](assets/terminal3.png)
 ---
 
 ### 🪟 OpenGL Tabanlı Oyun
@@ -219,3 +231,6 @@ app.terminate()
 ```
 
 > Butona her tıklamada terminal çıktısı olarak **tıklama sayısı** yazdırılır.
+
+![Cravexi Core Preview](assets/openglgame.png)
+
