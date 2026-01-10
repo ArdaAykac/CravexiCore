@@ -1,3 +1,974 @@
+## Technical Documentation
+
+#TR
+
+#### ECOSYSTEM Documentation
+
+Bu dökümantasyon, Python tabanlı bir oyun ve veri yönetimi framework'ünü açıklamaktadır. Framework; oyun yaratma, kaydetme/yükleme, RAM yönetimi, oyun döngüsü ve davranış sınıflarını içerir.
+
+⚡ Modules & Classes Overview
+Class / Module	Açıklama
+
+New_Game	Yeni oyun başlatmak ve oyun tiplerini yönetmek için kullanılır.
+
+SaveSystem	Oyun verilerini (inventory vb.) kaydetmek ve yüklemek için kullanılır.
+
+debug_system	Oyun sırasında debug mesajlarını yönetmek ve konsola yazdırmak için kullanılır.
+
+RAMManager	RAM üzerinde veri depolamak ve hızlı erişim sağlamak için kullanılır.
+
+Behaviour	Tüm oyun nesneleri için temel davranış şablonu. awake, start, update, draw fonksiyonlarını içerir.
+
+GameLoop	Oyun döngüsünü yönetir. Nesneleri ekler, günceller ve hedef FPS ile çalıştırır.
+
+#🕹️ New_Game Class
+
+    ´´´
+    class New_Game:
+    base_folder = "database"  # Oyun verilerinin kaydedileceği klasör
+    current_game = None
+    game_types = {"game name": 0, "networking": 1, "Games": 2}
+
+    @classmethod
+    def new_game(cls, game_name: str, networking: bool=False):
+        """
+        Yeni bir oyun başlatır.
+
+        Parameters:
+        - game_name (str): Oyunun adı
+        - networking (bool): Ağ desteği var mı?
+
+        Side Effects:
+        - `current_game` güncellenir
+        - Oyun için klasör oluşturulur
+        """
+    ´´´
+
+#Kullanım:
+
+´´´
+
+    New_Game.new_game("TerminalGame", networking=False)
+    print(New_Game.current_game)
+    # Output: ['TerminalGame', False]
+´´´
+
+💾 SaveSystem Class
+
+Oyun verilerini JSON formatında kaydeder ve yükler.
+
+Fonksiyonlar:
+
+save_inventory(game_name, inventory, filename="inventory.json")              
+Oyuncu envanterini kaydeder.
+
+Parametreler:
+
+game_name (str): Oyun adı
+
+inventory (Inventory nesnesi):        Kaydedilecek envanter
+
+filename (str, default=inventory.json):      Dosya adı
+
+load_inventory(game_name, inventory, filename="inventory.json")
+Daha önce kaydedilmiş envanteri yükler.
+Eğer dosya yoksa, envanter boş atanır.
+
+list_games(list_games=False, folders_path="database")
+Klasördeki oyunları listeler.
+
+Parametreler:
+
+list_games (bool): True ise oyunları listeler
+
+folders_path (str): Oyun klasörlerinin bulunduğu dizin
+
+#Örnek Kullanım
+
+    
+    from engine import SaveSystem
+    inventory = Inventory()
+    SaveSystem.save_inventory("TerminalGame", inventory)
+    SaveSystem.load_inventory("TerminalGame", inventory)
+    SaveSystem.list_games(True)
+
+
+#🐞debug_system Class
+
+Debug mesajlarını yönetmek için statik bir sınıftır.
+
+    debug_system.debug(arg, *game_types, debug=False)
+
+
+arg: Herhangi bir bilgi mesajı (opsiyonel)
+
+game_types: New_Game.game_types içinde kontrol edilecek tipler
+
+debug (bool): Debug modunu aktif eder
+
+#Örnek Kullanım:
+
+    debug_system.debug("Game Info", "game name", "networking", debug=True)
+
+
+
+Output:
+
+
+    # Debug is active
+    # <game name>: TerminalGame
+    # <networking>: False
+
+
+#🧠 RAMManager Class
+
+RAM üzerinde hızlı veri depolamak ve erişmek için kullanılır.
+
+    ram = RAMManager(size_kb=1024)  # 1 MB RAM allocate
+    ram.store("player_data", b"example bytes")
+    data = ram.load("player_data")
+
+
+size_kb: RAM boyutu kilobayt cinsinden
+
+store(key, data): RAM'e veri ekler
+
+load(key): RAM'den veri okur
+
+#🏗️ Behaviour Class
+
+Tüm oyun nesneleri için temel davranış şablonu.
+
+    class Behaviour:
+    def awake(self): pass      # Nesne oluşturulduğunda çağrılır
+    def start(self): pass      # Oyun başlatıldığında çağrılır
+    def update(self, dt): pass # Her frame güncelleme
+    def draw(self): pass       # Çizim yapılacaksa burada
+
+
+#⏱️ GameLoop Class
+    Oyun döngüsünü yönetir ve hedef FPS ile nesneleri çalıştırır.
+
+#Önemli Fonksiyonlar:
+
+add(obj)
+
+Oyun nesnesi ekler ve awake fonksiyonunu çağırır.
+
+run()
+
+Oyun döngüsünü başlatır, nesneleri günceller ve çizim yapar.
+
+stop()
+
+Döngüyü durdurur.
+
+#Parametreler:
+
+target_fps (int): Hedef FPS, default 60
+
+debug (bool): Debug mesajlarını aktif eder
+
+#Örnek Kullanım:
+
+    game_loop = GameLoop(target_fps=60, debug=True)
+
+    class Player(Behaviour):
+        def awake(self):
+            print("Player Awake")
+        def update(self, dt):
+            print(f"Updating player, dt={dt}")
+
+    player = Player()
+    game_loop.add(player)
+    game_loop.run()  # Ctrl+C ile durdurabilirsiniz veya game_loop.stop() ile
+
+
+🔹 Özet
+
+Bu framework ile:  
+Yeni oyunlar başlatabilir (New_Game)  
+Oyuncu envanterlerini kaydedip yükleyebilir (SaveSystem)  
+RAM üzerinde geçici veri depolayabilirsiniz (RAMManager)  
+Oyun nesnelerinin davranışlarını yönetebilirsiniz (Behaviour)  
+Sabit FPS ile oyun döngüsü oluşturabilirsiniz (GameLoop)   
+Debug mesajlarını kolayca takip edebilirsiniz (debug_system)
+
+## Registry Documentation
+
+🗂️ Registry Documentation  
+Bu modül, oyun içindeki tüm item tanımlarını merkezi olarak saklamak için kullanılır.
+Inventory, vanilla_items ve diğer sistemler bu sınıf üzerinden item doğrulaması yapar.  
+
+🎯 Amaç  
+Item’ları tek bir merkezde toplamak  
+Inventory’ye yalnızca kayıtlı item’ların eklenmesini sağlamak  
+Modüler ve genişletilebilir bir item altyapısı sunmak
+
+🧱 Registry Class
+    class Registry:
+        items = {}
+
+Açıklama:
+Tüm item tanımları items sözlüğü içinde saklanır.
+
+    Registry.items = {
+        "game:stone": {
+            "name": "Stone",
+            "item_id": 1,
+            "type": "block"
+        }
+    }
+
+
+📌 Sınıf Özellikleri
+| Özellik | Tip               | Açıklama                 |
+| ------- | ----------------- | ------------------------ |
+| `items` | `dict[str, dict]` | Item key → item metadata |
+
+Registry stateful ve globaldir.  
+Oyun çalıştığı sürece tüm item’lar bellekte tutulur.
+
+
+➕ register_item
+
+    @classmethod
+    def register_item(cls, item_key: str, item_data: dict):
+
+
+Açıklama  
+Yeni bir item’ı Registry’ye kaydeder.  
+
+Parametreler
+| Parametre   | Tip    | Açıklama                                      |
+| ----------- | ------ | --------------------------------------------- |
+| `item_key`  | `str`  | Item’ın benzersiz anahtarı (`namespace:item`) |
+| `item_data` | `dict` | Item metadata bilgileri                       |
+
+Davranış  
+Aynı item_key tekrar eklenirse üzerine yazar  
+Hata fırlatmaz (bilinçli basit tasarım)
+
+    Registry.register_item(
+        "game:stone",
+        {
+            "name": "Stone",
+            "item_id": 1,
+            "type": "block"
+        }
+    )
+
+🔍 get_item
+
+    @classmethod
+    def get_item(cls, item_key: str):
+
+Açıklama  
+Belirtilen item’ın metadata bilgisini döndürür.
+
+Parametreler
+| Parametre  | Tip   | Açıklama      |
+| ---------- | ----- | ------------- |
+| `item_key` | `str` | Item anahtarı |
+
+Dönüş Değeri
+| Durum      | Dönüş  |
+| ---------- | ------ |
+| Item varsa | `dict` |
+| Item yoksa | `None` |
+
+Örnek
+
+    item = Registry.get_item("game:stone")
+
+    print(item["name"])
+OUTPUT:
+
+    # Stone
+
+
+✔️ has_item
+
+    @classmethod
+    def has_item(cls, item_key: str) -> bool:
+
+Açıklama  
+Bir item’ın Registry’de kayıtlı olup olmadığını kontrol eder. 
+
+Parametreler
+| Parametre  | Tip   | Açıklama                       |
+| ---------- | ----- | ------------------------------ |
+| `item_key` | `str` | Kontrol edilecek item anahtarı |
+
+Dönüş Değeri
+| Değer   | Açıklama           |
+| ------- | ------------------ |
+| `True`  | Item kayıtlı       |
+| `False` | Item kayıtlı değil |
+
+
+Örnek:
+
+    Registry.has_item("game:stone")  # True
+    Registry.has_item("game:diamond")  # False
+
+
+🔗 Sistem Entegrasyonu  
+Inventory
+
+    if not Registry.has_item(item_key):
+    print("[Inventory] Unknown item")
+
+
+Vanilla Item Loader
+
+    Registry.register_item("game:wood", {...})
+
+## İTEMS Documentation
+
+
+🧱 vanilla_items Documentation
+
+Bu modül, oyunda varsayılan (vanilla) item’ların Registry sistemine kaydedilmesini sağlar. Oyun başlatılırken bir kez çağrılması gerekir.
+
+🔗 Bağımlılıklar
+
+    from engine.registry import Registry
+Bu modül, item kayıt işlemleri için Registry sistemine bağımlıdır.
+
+
+📦 load_vanilla_item Function
+Tanım
+
+    def load_vanilla_item():
+
+Açıklama  
+Oyunun temel (vanilla) item’larını Registry sistemine kaydeder.
+
+Bu fonksiyon çağrılmadan önce:  
+Inventory.add_item  
+Inventory.set_item  
+çalışmaz, çünkü item’lar Registry’de kayıtlı değildir.
+
+
+🧾 Kayıt Edilen Item’lar
+🪨 Stone
+
+    Registry.register_item(
+        "game:stone",
+        {
+            "name": "Stone",
+            "item_id": 1,
+            "type": "block"
+        }
+    )
+
+| Alan      | Tip   | Açıklama            |
+| --------- | ----- | ------------------- |
+| `key`     | `str` | `"game:stone"`      |
+| `name`    | `str` | Oyunda görünen ad   |
+| `item_id` | `int` | Dahili benzersiz ID |
+| `type`    | `str` | Item türü (`block`) |
+
+
+
+▶️ Ne Zaman Çağrılmalı?  
+Bu fonksiyon oyun başlatılırken, en erken aşamada çağrılmalıdır.  
+
+Önerilen Akış
+
+    from engine.ecosystem import New_Game
+    from engine.items import load_vanilla_item
+    from engine.inventory import Inventory
+
+    New_Game.new_game("MyGame")
+    load_vanilla_item()
+
+    inv = Inventory()
+    inv.add_item("game:stone", 5)
+
+⚠️ Önemli Notlar  
+Bu fonksiyon birden fazla kez çağrılmamalıdır  
+Aynı item key’i tekrar register edilirse  
+Registry ya hata fırlatmalı  
+ya da overwrite etmemelidir (Registry implementasyonuna bağlı)
+
+
+
+
+🔹 Özet  
+✔ Oyunun temel item’larını yükler  
+✔ Inventory ve SaveSystem ile tam uyumludur  
+✔ Modüler item sistemine uygundur  
+✔ Registry tabanlı güvenli tasarım
+## İnventory Documentation
+
+#📦 Inventory Documentation  
+Bu modül, oyun içi item (eşya) yönetimini sağlar. Registry sistemi ile entegre çalışır ve yalnızca kayıtlı (registered) item’ların envantere eklenmesine izin verir.
+
+#🔗 Bağımlılıklar
+    from engine.registry import Registry
+
+Inventory, item doğrulaması için Registry sistemine bağımlıdır.  
+Registry.has_item(item_key) → item sistemde kayıtlı mı kontrol eder
+
+🧱 Inventory Class  
+
+Açıklama:  
+Oyuncunun veya sistemin sahip olduğu item’ları tutar.
+Item’lar dict yapısında saklanır.
+
+    self.items = {
+    "stone": 12,
+    "wood": 5
+    }
+
+
+📌 Özellikler
+| Özellik | Tip              | Açıklama             |
+| ------- | ---------------- | -------------------- |
+| `items` | `dict[str, int]` | Item anahtarı → adet |
+
+
+➕ add_item
+
+    def add_item(self, item_key: str, count=1) -> bool
+
+Açıklama  
+Belirtilen item’ı envantere ekler veya mevcutsa miktarını artırır.
+
+#Parametreler
+
+| Parametre  | Tip   | Açıklama                          |
+| ---------- | ----- | --------------------------------- |
+| `item_key` | `str` | Registry’de kayıtlı item anahtarı |
+| `count`    | `int` | Eklenecek miktar (default: `1`)   |
+
+Davranış  
+Item Registry’de yoksa → eklenmez  
+Item varsa → mevcut sayıya eklenir
+
+| Değer   | Açıklama               |
+| ------- | ---------------------- |
+| `True`  | Item başarıyla eklendi |
+| `False` | Item Registry’de yok   |
+
+ÖRNEK:
+
+    inv = Inventory()
+
+    inv.add_item("stone", 3)
+    inv.add_item("wood")
+
+    print(inv.items)
+
+OUTPUT:
+
+    # {'stone': 3, 'wood': 1}
+
+✏️ set_item
+
+    def set_item(self, item_key: str, count: int) -> bool
+
+Açıklama  
+Bir item’ın miktarını doğrudan ayarlar.
+
+Parametreler
+| Parametre  | Tip   | Açıklama                 |
+| ---------- | ----- | ------------------------ |
+| `item_key` | `str` | Registry’de kayıtlı item |
+| `count`    | `int` | Yeni miktar              |
+
+
+Kurallar  
+count > 0 → miktar ayarlanır  
+count <= 0 → item envanterden silinir  
+Item Registry’de yoksa işlem yapılmaz  
+Dönüş Değeri
+| Değer   | Açıklama             |
+| ------- | -------------------- |
+| `True`  | İşlem başarılı       |
+| `False` | Item Registry’de yok |
+
+Örnek
+
+    inv.set_item("stone", 10)
+    inv.set_item("wood", 0)
+
+    print(inv.items)
+OUTPUT:
+
+    # {'stone': 10}
+
+
+
+⚠️ Hata ve Uyarılar  
+Registry’de olmayan bir item kullanılırsa:  
+
+    [Inventory] Unknown item: diamond_sword
+
+
+
+🧩 Registry ile Entegrasyon  
+Bu sınıf Registry zorunlu olacak şekilde tasarlanmıştır.  
+Beklenen Registry arayüzü:
+
+    class Registry:
+    @staticmethod
+    def has_item(item_key: str) -> bool:
+        ...
+
+
+🧠 Tasarım Notları  
+Inventory bilinçli olarak pasif tutulmuştur
+(render, UI veya save işlemleri içermez)  
+JSON ile kaydetmeye uygundur (SaveSystem ile tam uyumlu)  
+Multiplayer veya server-side inventory için güvenlidir
+
+
+🧪 Tipik Kullanım Akışı
+
+    from engine.inventory import Inventory
+    from engine.ecosystem import SaveSystem
+    
+    inv = Inventory()
+    
+    inv.add_item("stone", 5)
+    inv.set_item("wood", 2)
+    
+    SaveSystem.save_inventory("MyGame", inv)
+
+## UI Documentation
+
+#🖨️ UIPrint Class  
+UI ile entegre çalışan özel bir print sistemidir. Normal print gibi çalışır ancak sahne değiştiğinde veya element silindiğinde yazılar kaybolur.
+
+    class UIPrint:
+    def __init__(self):
+        self.buffer = []  # Yazılar saklanır
+        self.active_scene = None
+
+    def set_scene(self, scene):
+        """Aktif sahneyi belirler ve buffer’ı temizler."""
+    
+    def print(self, *args, **kwargs):
+        """Yeni yazı ekler, sahne varsa UI'yi günceller."""
+    
+    def get_buffer(self):
+        """Buffer'daki tüm yazıları listeler."""
+    
+    def clear(self):
+        """Buffer'ı temizler ve UI'yi günceller."""
+Örnek Kullanım:
+
+    ui_print.print("Hello World")
+    print(ui_print.get_buffer())  # ['Hello World']
+    ui_print.clear()
+
+
+⚡ UIElement Class
+
+Tüm UI elementleri için temel sınıf.
+
+    class UIElement:
+    def __init__(self):
+        self.visible = True
+        self.ui = None
+        self.focusable = False
+
+    def draw(self, focused=False):
+        pass
+
+    def handle_input(self, input_type):
+        pass
+
+draw(focused=False): Elementi çizer.  
+
+handle_input(input_type): Kullanıcı girdilerini işler.       
+
+
+
+🔘 Button Class  
+UIElement sınıfından türetilmiştir. Tıklanabilir buton sağlar.
+
+    class Button(UIElement):
+    def __init__(self, text, on_click):
+        self.text = text
+        self.on_click = on_click
+        self.focusable = True
+
+    def draw(self, focused=False):
+        """Console üzerinde butonu çizer."""
+    
+    def handle_input(self, input_type):
+        """Enter veya metin eşleşmesi ile on_click tetikler."""
+
+#Örnek Kullanım:
+
+    def click_action():
+    print("Button clicked!")
+
+    btn = Button("Play", click_action)
+    btn.handle_input("enter")  # Çıktı: Button clicked!
+
+
+
+🏷️ Label Class  
+Sadece yazı göstermek için kullanılır.
+
+    class Label(UIElement):
+    def __init__(self, text):
+        self.text = text
+
+    def draw(self, focused=False):
+        """Console üzerinde yazıyı çizer."""
+
+🧩 UIManager Class  
+UI elementlerini yönetir, odak ve input yönetimi sağlar.
+
+    class UIManager:
+    def __init__(self):
+        self.elements = []
+        self.focus_index = 0
+        self.dirty = True
+        self.input_buffer = None
+
+    def add(self, element):
+        """UI element ekler."""
+
+    def update(self, dt):
+        """Inputları kontrol eder ve UI'yi çizer."""
+
+    def move_focus(self, direction):
+        """Odaklanmış elementi değiştirir."""
+
+    def get_focused_element(self):
+        """Odaklanmış element döndürür."""
+
+    def draw(self):
+        """UI ve buffer yazılarını konsola çizer."""
+
+    def feed_input(self, input_str):
+        """Input'u UI sistemine besler."""
+
+
+elements: UI elementlerinin listesi.  
+dirty: Ekran güncellenmeli mi kontrolü.  
+input_buffer: Kullanıcı girdisi bekler.  
+
+Örnek Kullanım:
+
+    ui_manager = UIManager()
+    ui_manager.add(Button("Play", lambda: print("Clicked")))
+    ui_manager.update(0.016)  # frame update
+
+
+
+#🎬 Scene Class  
+UIManager ile entegre sahne yönetimi sağlar.
+
+    class Scene:
+    def __init__(self, name):
+        self.name = name
+        self.ui_manager = UIManager()
+
+    def enter(self):
+        """Sahne aktif olur, UI buffer temizlenir."""
+
+    def exit(self):
+        """Sahneden çıkılır, buffer temizlenir."""
+
+    def update(self, dt):
+        """UIManager güncellemesi çağrılır."""
+
+
+#🔄 SceneManager Class  
+Sahne değişimlerini ve güncellemelerini yönetir.
+
+    class SceneManager:
+    def __init__(self):
+        self.current_scene = None
+
+    def change_scene(self, scene: Scene):
+        """Mevcut sahneden çıkar ve yeni sahneye geçer."""
+
+    def update(self, dt):
+        """Aktif sahneyi günceller."""
+
+    def feed_input(self, data):
+        """Input'u sahneye gönderir."""
+
+Örnek Kullanım:
+
+    sm = SceneManager()
+    scene1 = Scene("MainMenu")
+    sm.change_scene(scene1)
+    sm.feed_input("enter")
+    sm.update(0.016)
+
+
+#⌨️ Input Thread  
+Konsoldan sürekli kullanıcı girişi almak için thread başlatır.
+
+    def start_input_thread(scene_manager: SceneManager):
+    """Sonsuz loop ile input alır ve sahneye besler."""
+
+
+Thread daemon olarak çalışır, ana program kapanınca otomatik biter.
+
+
+#🖥️ OPD2 Class  
+OpenGL + GLFW ile pencere oluşturur ve frame yönetimi sağlar.
+
+    class OPD2:
+    def __init__(self, width, height, window_name):
+        """
+        Pencere oluşturur ve OpenGL context başlatır.
+        Parameters:
+        - width: Pencere genişliği
+        - height: Pencere yüksekliği
+        - window_name: Pencere başlığı
+        """
+    
+    def begin_frame(self):
+        """Yeni frame başlatır, arka plan rengini temizler."""
+    
+    def end_frame(self):
+        """Frame sonlandırır, buffer swap ve event polling yapar."""
+    
+    def should_close(self):
+        """Pencerenin kapanma durumu kontrol edilir."""
+    
+    def terminate(self):
+        """GLFW ve pencereyi sonlandırır."""
+
+
+Örnek Kullanım:
+
+    window = OPD2(800, 600, "Demo")
+    while not window.should_close():
+        window.begin_frame()
+        # OpenGL çizimleri
+        window.end_frame()
+    window.terminate()
+
+
+🔹 Özet
+
+Terminal tabanlı UI ve sahne yönetimi: UIPrint, UIElement, Button, Label, UIManager, Scene, SceneManager
+
+Input yönetimi için thread desteği: start_input_thread
+
+OpenGL ile pencere ve render yönetimi: OPD2
+
+## GLELEMENTS Documentation
+
+OpenGL + GLFW kullanılarak oluşturulmuş basit bir buton sınıfıdır. Pencere üzerinde tıklanabilir butonlar oluşturur ve renkli gösterim sağlar.
+
+
+🖱️ GLButton Class
+
+Tanım:
+
+    class GLButton:
+    def __init__(self, x, y, w, h, color, on_click):
+        
+Açıklama:
+Bu sınıf, OpenGL üzerinde bir dikdörtgen buton oluşturur ve kullanıcı tıklamalarını algılar. update fonksiyonu ile mouse hareketlerini ve tıklamaları takip eder, draw fonksiyonu ile butonu ekrana çizer.
+
+#Parametreler
+
+| Parametre  | Tip      | Açıklama                                 |
+| ---------- | -------- | ---------------------------------------- |
+| `x`        | float    | Butonun sol üst X koordinatı             |
+| `y`        | float    | Butonun sol üst Y koordinatı             |
+| `w`        | float    | Butonun genişliği                        |
+| `h`        | float    | Butonun yüksekliği                       |
+| `color`    | tuple    | RGB renk, örn: `(1.0, 0.0, 0.0)` kırmızı |
+| `on_click` | function | Butona tıklanınca çalışacak fonksiyon    |
+
+
+
+#Fonksiyonlar  
+1️⃣ update(window)
+
+    def update(self, window):
+    ...
+
+Açıklama:
+Mouse pozisyonunu ve tıklamayı kontrol eder. Eğer kullanıcı butona tıklarsa, on_click fonksiyonunu çağırır.
+
+Parametreler:
+
+| Parametre | Tip                | Açıklama                     |
+| --------- | ------------------ | ---------------------------- |
+| `window`  | GLFW window object | Butonun bağlı olduğu pencere |
+
+İşleyiş:
+
+glfw.get_cursor_pos(window)  ile mouse pozisyonunu alır.  
+Mouse Y eksenini düzeltir (GLFW'de üst sol orijin, OpenGL’de alt sol orijin).  
+Butonun üzerine gelinip gelinmediğini kontrol eder.  
+Sol fare tuşuna basıldığında on_click çağrılır ve pressed durumu güncellenir.
+
+2️⃣ draw()
+
+    def draw(self):
+    ...
+
+Açıklama:
+Butonu OpenGL üzerinde dikdörtgen olarak çizer. Renk, sınıfın color parametresinden alınır.  
+İşleyiş:  
+glColor3f(*self.color) ile renk ayarlanır.  
+glBegin(GL_QUADS) ve glVertex2f ile dört köşe çizilir.  
+glEnd() ile çizim tamamlanır.
+
+#Örnek Kullanım
+
+    import glfw
+    from OpenGL.GL import *
+    from glbutton import GLButton  # GLButton sınıfınızın bulunduğu dosya
+
+    def on_button_click():
+        print("Button clicked!")
+
+    # GLFW başlatma
+    if not glfw.init():
+        exit()
+
+    window = glfw.create_window(800, 600, "GLButton Demo", None, None)
+    glfw.make_context_current(window)
+
+    # Buton oluştur
+    button = GLButton(100, 100, 200, 50, (0.0, 1.0, 0.0), on_button_click)
+
+    while not glfw.window_should_close(window):
+        glClear(GL_COLOR_BUFFER_BIT)
+
+        button.update(window)
+        button.draw()
+
+        glfw.swap_buffers(window)
+        glfw.poll_events()
+
+    glfw.terminate()
+
+Önemli Notlar  
+GLButton sadece 2D dikdörtgen butonlar için uygundur.  
+Y ekseni OpenGL’de alt sol orijin olduğu için update() fonksiyonu mouse Y pozisyonunu düzeltir.   
+on_click fonksiyonu bloklayıcı olmamalıdır, çünkü her frame çağrılır.
+
+## 🌐 network Documentation
+
+Bu modül, oyunun ağ (network) tarafı için temel bir TCP server oluşturmayı sağlar.  
+Basit ve öğrenme odaklı bir yapı sunar, küçük ölçekli multiplayer denemeleri için uygundur.
+
+🔗 Bağımlılıklar
+
+    import socket
+    import requests
+
+⚠️ requests şu an kullanılmıyor, ileride:  
+public IP alma  
+master server’a kayıt  
+HTTP tabanlı handshake  
+gibi işlemler için düşünüldü
+
+
+🧱 network Class  
+Bu sınıf state tutmaz, tüm işlemler @classmethod ile yapılır.
+
+🛠️ create_server
+
+    @classmethod
+    def create_server(
+        cls,
+        server_ip,
+        port,
+        max_player=None,
+        debug=True
+    )
+
+
+Açıklama  
+Belirtilen IP ve port üzerinde TCP server oluşturur ve ilk client bağlantısını kabul eder.
+
+📥 Parametreler
+| Parametre    | Tip           | Açıklama                           |
+| ------------ | ------------- | ---------------------------------- |
+| `server_ip`  | `str`         | Server’ın bind edileceği IP adresi |
+| `port`       | `int`         | Dinlenecek port                    |
+| `max_player` | `int \| None` | Maksimum oyuncu sayısı (1–4)       |
+| `debug`      | `bool`        | Debug çıktıları aktif mi           |
+
+
+⚙️ Varsayılan Davranışlar  
+max_player = None → otomatik 4  
+max_player aralığı: 1–4  
+Aksi halde ValueError fırlatılır
+
+    if not 1 <= max_player < 5:
+    raise ValueError("max_player 1 ile 4 arasında olmalı")
+
+🐞 Debug Modu
+Debug = True
+
+    Debug: Debug is True
+    Server Ip: 127.0.0.1
+    Max Player: 4
+    Waiting Players
+
+
+Debug = False
+
+    Debug: Debug is False
+
+
+🔌 Server Akışı  
+TCP socket oluşturulur  
+IP ve port’a bind edilir  
+Dinlemeye geçilir  
+İlk client bağlantısı kabul edilir
+
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((server_ip, port))
+    server.listen()
+
+    client, addr = server.accept()
+    print("Connection request from", addr)
+
+
+⚠️ Şu an:  
+sadece 1 client kabul edilir  
+max_player henüz gerçek anlamda kullanılmıyor
+
+▶️ Örnek Kullanım
+
+    from engine.network import network
+
+    network.create_server(
+        server_ip="127.0.0.1",
+        port=5555,
+        max_player=2,
+        debug=True
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## ReadMe And Some Technical information
+
 
 # ENGLISH
 
