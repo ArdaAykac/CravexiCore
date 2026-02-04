@@ -22,6 +22,8 @@ Python 3.10 veya üstü Gerekli kütüphaneler:
 
     pip install glfw PyOpenGL Pillow
 
+Engine Klasöründeki tüm dosyaları kendi mevcut projenize eklemelisiniz
+
 Önerilen klasör yapısı:
 
     engine/
