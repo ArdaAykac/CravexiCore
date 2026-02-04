@@ -1,3 +1,0 @@
-class network:
-    @classmethod
-    def create_server(cls, server_ip, port, max_player=None, debug: bool = True): ...
