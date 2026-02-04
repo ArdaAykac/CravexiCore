@@ -228,6 +228,138 @@ yazı göstermek için.
 
     label = GLLabel(x=50, y=400, text="Hello World", color=(1,1,0), scale=8, max_width=500)
 
+Nesneler  
+GLELEMENTS
+Transform
+
+GLObject (Base class)
+
+GLQuad
+
+GLCircle
+
+GLCylinder
+
+🔹 Transform
+
+Tüm sahne objelerinin konum, dönüş ve ölçek bilgilerini tutar.
+
+Oluşturma
+
+    t = Transform(x=0, y=0, z=0, rotation=0, sx=1, sy=1, sz=1)
+
+| Özellik    | Tip            | Açıklama               |
+| ---------- | -------------- | ---------------------- |
+| `position` | `[x, y, z]`    | Dünya konumu           |
+| `rotation` | `float`        | Derece cinsinden dönüş |
+| `scale`    | `[sx, sy, sz]` | Ölçek                  |
+
+Metotlar
+
+    translate(dx, dy, dz=0)
+Objeyi mevcut konumundan kaydırır.
+
+    rotate(angle)
+Objeyi Z ekseni etrafında döndürür.
+
+    set_position(x, y, z=0)
+Objenin konumunu doğrudan ayarlar.
+
+    set_rotation(angle)
+Objenin dönüşünü doğrudan ayarlar.
+
+GLObject (Base Class)
+
+Tüm OpenGL objelerinin temel sınıfıdır.
+Tek başına çizilmez.
+
+| Özellik     | Açıklama              |
+| ----------- | --------------------- |
+| `transform` | Transform instance    |
+| `color`     | RGB tuple             |
+| `visible`   | Çizilip çizilmeyeceği |
+
+
+🔹 GLQuad (Dikdörtgen / Kare)
+
+2D düzlemde merkezden çizilen bir dörtgendir.
+
+Oluşturma
+
+    quad = GLQuad(width=100, height=50, color=(1, 0, 0))
+Çizim Özellikleri   
+Merkezden çizilir   
+Transform tamamen etkilidir   
+Z rotasyonu destekler   
+
+Örnek Kullanım
+
+    from engine.GLELEMENTS import GLQuad
+    quad = GLQuad(100, 100, color=(1, 0, 0))
+    quad.transform.set_position(400, 300)
+    quad.transform.set_rotation(45)
+    quad.draw()
+
+GLCircle (2D Daire)
+
+Segment bazlı OpenGL dairesi.
+
+    circle = GLCircle(radius=50, segments=32, color=(0, 1, 0))
+
+| Parametre  | Açıklama         |
+| ---------- | ---------------- |
+| `radius`   | Yarıçap          |
+| `segments` | Daire düzgünlüğü |
+| `color`    | RGB renk         |
+
+Örnek
+
+    circle = GLCircle(40, color=(0, 0, 1))
+    circle.transform.set_position(200, 200)
+    circle.draw()
+
+GLCylinder (3D Silindir)  
+Z ekseninde yükselen 3D silindir.
+
+Oluşturma:   
+
+    cyl = GLCylinder(radius=20, height=100, segments=32, color=(1, 1, 0))
+
+Notlar   
+Y ekseni etrafında döner   
+Derinlik testi (GL_DEPTH_TEST) gerektirir   
+OPD2 classında varsayılan olarak kapalıdır   
+Sadece 3D pencerelerde kullanılır şuanllık OPD2 yani 2D pencere desteği vardır
+
+    glEnable(GL_DEPTH_TEST)
+    cyl = GLCylinder(30, 120)
+    cyl.transform.set_position(400, 300, 0)
+    cyl.transform.set_rotation(45)
+    cyl.draw()
+
+
+örnek oyun:
+
+    from engine.GUIS import OPD2
+    from engine.GLELEMENTS import GLQuad, GLCircle
+
+    window = OPD2(800, 600, "Demo")
+
+    quad = GLQuad(100, 100, color=(1, 0, 0))
+    quad.transform.set_position(400, 300)
+
+    circle = GLCircle(40, color=(0, 1, 0))
+    circle.transform.set_position(200, 200)
+
+    while not window.should_close():
+        window.begin_frame()
+        quad.draw()
+        circle.draw()
+        window.end_frame()
+
+    window.terminate()
+
+
 
 | Parametre   | Açıklama                              | Zorunlu / Opsiyonel | Default   |
 | ----------- | ------------------------------------- | ------------------- | --------- |
